@@ -4,8 +4,16 @@ import ReactDOM from 'react-dom'
 const App = (props) => {
   const [selected, setSelected] = useState(0)
   
-  const maxIndex = props.anecdotes.length - 1
-  const [votes, setVotes] = useState(Array.from({length: 8}, _ => 0))
+  const maxIndex = props.anecdotes.length
+  const [votes, setVotes] = useState(Array.from({length: maxIndex}, _ => 0))
+  const [mostVotedIndex, setMostVotedIndex] = useState(0)
+
+  /*
+  const [mostVote, mostVoted] = votes.reduce(
+    ([mv, mvd], x, idx) => x >= mv ? [x, idx] : [mv, mvd], [0, 0])
+
+  console.log(mostVoted, mostVote)
+  */
 
   const handleNext = () => setSelected(Math.floor(Math.random() * maxIndex))
   
@@ -13,12 +21,19 @@ const App = (props) => {
     const copy = [...votes]
     copy[selected] += 1
     setVotes(copy)
+    if (votes[mostVotedIndex] <= votes[selected])
+      setMostVotedIndex(selected)
   }
   return (
     <div>
+      <h1>Anecdote of the day</h1>
       <p>{props.anecdotes[selected]} <br />has {votes[selected]} votes</p>
       <button onClick={handleNext}>next anecdote</button>
       <button onClick={handleVote}>vote</button>
+
+      <h1>Anecdote with most votes</h1>
+      <p>{props.anecdotes[mostVotedIndex]}</p>
+      <p>With {votes[mostVotedIndex]} votes</p>
     </div>
   )
 }
