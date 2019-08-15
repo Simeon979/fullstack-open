@@ -341,6 +341,7 @@ const App = () => {
 
   const [newPattern, setNewPattern] = useState("")
   const [countries, setCountries] = useState([])
+  const [expanded, setExpanded] = useState([])
 
   useEffect(() => {
     axios
@@ -348,10 +349,13 @@ const App = () => {
       .then(response => setCountries(response.data))
   }, [])
 
-  const countriesToShow = countries.filter(country => {
+  const countriesToShow =
+    countries
+      .filter(country => {
     const pattern = new RegExp(newPattern, "i")
     return pattern.test(country.name)
   })
+      .map(country => ({...country, expanded: expanded.includes(country.name)}))
 
   const handlePatternChange = (event) => {
     setNewPattern(event.target.value)
@@ -362,10 +366,20 @@ const App = () => {
     setNewPattern("")
   }
 
+  const handleShowClick = (event) => {
+    setExpanded([...expanded, event.target.previousSibling.textContent])
+  }
+
+  const handleHideClick = (event) => {
+    const country = event.target.previousSibling.textContent
+    const newExpanded = expanded.filter(name => name !== country)
+    setExpanded(newExpanded)
+  }
+
   return(
     <div>
       <Filter newPattern={newPattern} handlePatternChange={handlePatternChange} handleFilterSubmit={handleFilterSubmit} />
-      <Countries countriesToShow={countriesToShow} />
+      <Countries countriesToShow={countriesToShow} handleShowClick={handleShowClick} handleHideClick={handleHideClick} />
     </div>
   )
 }
