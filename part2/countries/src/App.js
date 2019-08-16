@@ -3,6 +3,7 @@ import axios from "axios"
 
 import Filter from "./components/Filter"
 import Countries from "./components/Countries"
+import Weather from "./components/Weather"
 
 const App = () => {
 
@@ -47,6 +48,7 @@ const App = () => {
     <div>
       <Filter newPattern={newPattern} handlePatternChange={handlePatternChange} handleFilterSubmit={handleFilterSubmit} />
       <Countries countriesToShow={countriesToShow} handleShowClick={handleShowClick} handleHideClick={handleHideClick} />
+      { countriesToShow.length === 1 && <Weather name={countriesToShow[0].capital} /> }
     </div>
   )
 }
