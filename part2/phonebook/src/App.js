@@ -2,8 +2,7 @@ import React, { useState, useEffect } from 'react'
 import axios from "axios"
 
 const Filter = ({ newPattern, handlePatternChange }) => (
-  <form>
-    <label htmlFor="search">filter shown with</label>
+  <form> <label htmlFor="search">filter shown with</label>
     <input id="search" value={newPattern} onChange={handlePatternChange} />
   </form>
 )
@@ -58,10 +57,19 @@ const App = () => {
   const handleFormSubmit = (event) => {
     event.preventDefault()
     if (!persons.find(person => newName === person.name)) {
-      setPersons([...persons, {name: newName, number: newNumber}])
-      setNewName("")
-      setNewNumber("")
-      setNewPattern("")
+      const newPerson = {
+        name: newName,
+        number: newNumber
+      }
+      axios
+        .post("http://localhost:3001/persons", newPerson)
+        .then(response => {
+          setPersons(persons.concat(response.data))
+          setNewName("")
+          setNewNumber("")
+          setNewPattern("")
+        })
+        .catch(err => alert("There was an error saving the contact", err))
     } else {
       alert(`${newName} already exist`)
     }
