@@ -25,8 +25,11 @@ const PersonForm = ({ newName, newNumber, handleNameChange, handleNumberChange, 
   </form>
 );
 
-const Persons = ({ persons }) => {
-  const entryRows = () => persons.map(person => <p key={person.name}>{person.name} {person.number}</p>)
+const Person = ({ person, handleDelete }) =>
+  <p>{person.name} {person.number} <button onClick={handleDelete(person.id)}>delete</button></p>
+
+const Persons = ({ persons, handleDelete }) => {
+  const entryRows = () => persons.map(person => <Person key={person.id} person={person} handleDelete={handleDelete} />)
 
   return <div>{ entryRows() }</div>
 };
@@ -76,6 +79,18 @@ const App = () => {
     }
   }
 
+  const handleDelete = (id) => () => {
+    console.log(id)
+    const toDelete = personsToShow.find(person => person.id === id)
+    const confirmDelete = window.confirm(`Are you sure you want to remove ${toDelete.name}`)
+
+    confirmDelete && phonebookService.deletePerson(id)
+      .then(response => {
+        setPersons(persons.filter(person => person.id !== id))
+      })
+      .catch(err => alert("There was an error deleting the entry"))
+  }
+
   return (
     <div>
       <h2>Phonebook</h2>
@@ -83,7 +98,7 @@ const App = () => {
       <h3>add new</h3>
       <PersonForm newName={newName} newNumber={newNumber} handleNameChange={handleNameChange} handleNumberChange={handleNumberChange} handleFormSubmit={handleFormSubmit} />
       <h3>Numbers</h3>
-      <Persons persons={personsToShow} />
+      <Persons persons={personsToShow} handleDelete={handleDelete} />
     </div>
   )
 }
