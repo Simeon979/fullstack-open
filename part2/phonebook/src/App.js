@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react'
 import axios from "axios"
 
+import phonebookService from "./services/phonebook"
+
 const Filter = ({ newPattern, handlePatternChange }) => (
   <form> <label htmlFor="search">filter shown with</label>
     <input id="search" value={newPattern} onChange={handlePatternChange} />
@@ -37,9 +39,9 @@ const App = () => {
   const [ newPattern, setNewPattern ] = useState("")
 
   useEffect(() => {
-    axios
-      .get("http://localhost:3001/persons")
-      .then(response => setPersons(response.data))
+    phonebookService.getAll()
+      .then(response => setPersons(response))
+      .catch(err => alert("there was an error getting phonebook", err))
   }, [])
 
   const personsToShow = persons.filter(
@@ -61,10 +63,9 @@ const App = () => {
         name: newName,
         number: newNumber
       }
-      axios
-        .post("http://localhost:3001/persons", newPerson)
+      phonebookService.create(newPerson)
         .then(response => {
-          setPersons(persons.concat(response.data))
+          setPersons(persons.concat(response))
           setNewName("")
           setNewNumber("")
           setNewPattern("")
