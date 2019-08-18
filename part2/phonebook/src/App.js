@@ -61,7 +61,8 @@ const App = () => {
 
   const handleFormSubmit = (event) => {
     event.preventDefault()
-    if (!persons.find(person => newName === person.name)) {
+    const exists = persons.find(person => newName === person.name)
+    if (!exists) {
       const newPerson = {
         name: newName,
         number: newNumber
@@ -75,7 +76,22 @@ const App = () => {
         })
         .catch(err => alert("There was an error saving the contact", err))
     } else {
-      alert(`${newName} already exist`)
+      const confirmUpdate = window.confirm(`${newName} is already added to phonebook, replace old number with a new one?`)
+
+      if (confirmUpdate) {
+        const updatedPerson = {
+        name: exists.name,
+        number: newNumber
+        }
+
+        phonebookService.update(exists.id, updatedPerson)
+          .then(response => {
+            setPersons(persons.map(person => person.id === response.id ? response : person))
+            setNewName("")
+            setNewNumber("")
+            setNewPattern("")
+          })
+      } else alert(`${newName} already exist`)
     }
   }
 
