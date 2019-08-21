@@ -1,7 +1,14 @@
 import React, { useState, useEffect } from 'react'
-import axios from "axios"
 
 import phonebookService from "./services/phonebook"
+
+const Notification = ({ message, isError }) => {
+  if (message === null) return null
+
+  return (
+    <div className={isError ? "error" : "success"}>{message}</div>
+  )
+}
 
 const Filter = ({ newPattern, handlePatternChange }) => (
   <form> <label htmlFor="search">filter shown with</label>
@@ -40,11 +47,19 @@ const App = () => {
   const [ newName, setNewName ] = useState('')
   const [ newNumber, setNewNumber ] = useState("")
   const [ newPattern, setNewPattern ] = useState("")
+  const [ notif, setNotif ] = useState({message: null, isError: false})
+
+  const displayNotif = (notif) => {
+    setNotif(notif)
+    setTimeout(() => setNotif({message: null, isError: false}), 5000)
+  }
 
   useEffect(() => {
     phonebookService.getAll()
       .then(response => setPersons(response))
-      .catch(err => alert("there was an error getting phonebook", err))
+      .catch(err => {
+        displayNotif({ message: "there was an error getting phonebook", isError: true })
+      })
   }, [])
 
   const personsToShow = persons.filter(
@@ -53,7 +68,6 @@ const App = () => {
       return pattern.test(person.name)
     }
   )
-
 
   const handleNameChange = (event) => setNewName(event.target.value)
   const handleNumberChange = (event) => setNewNumber(event.target.value)
@@ -70,11 +84,12 @@ const App = () => {
       phonebookService.create(newPerson)
         .then(response => {
           setPersons(persons.concat(response))
+          displayNotif({message: `Added ${response.name}`, isError: false})
           setNewName("")
           setNewNumber("")
           setNewPattern("")
         })
-        .catch(err => alert("There was an error saving the contact", err))
+        .catch(err => displayNotif({message: "There was an error saving the contact", isError: true}))
     } else {
       const confirmUpdate = window.confirm(`${newName} is already added to phonebook, replace old number with a new one?`)
 
@@ -91,7 +106,9 @@ const App = () => {
             setNewNumber("")
             setNewPattern("")
           })
-      } else alert(`${newName} already exist`)
+          .catch(err => displayNotif({message: `information of ${updatedPerson.name} has already been removed from server`, isError: true}))
+        
+      } else displayNotif({message: `${newName} already exist`, isError: true})
     }
   }
 
@@ -104,11 +121,12 @@ const App = () => {
       .then(response => {
         setPersons(persons.filter(person => person.id !== id))
       })
-      .catch(err => alert("There was an error deleting the entry"))
+      .catch(err => displayNotif({message: "There was an error deleting the entry", isError: true}))
   }
 
   return (
     <div>
+      <Notification message={notif.message} isError={notif.isError} />
       <h2>Phonebook</h2>
       <Filter newPattern={newPattern} handlePatternChange={handlePatternChange} />
       <h3>add new</h3>
